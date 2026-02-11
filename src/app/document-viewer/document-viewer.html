@@ -1,0 +1,38 @@
+@if (document(); as document) {
+  <header class="toolbar">
+    <h1 class="document-name">{{ document.name }}</h1>
+    @if (pageIndicator(); as pageIndicator) {
+      <span class="page-indicator">{{ pageIndicator }}</span>
+    }
+  </header>
+}
+<div class="document-area" #scrollContainer>
+  @if (loading()) {
+    <div class="loading">
+      <app-spinner />
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <p i18n="@@documentLoadError">Не удалось загрузить документ</p>
+      <p>{{ error() }}</p>
+    </div>
+  } @else if (document(); as document) {
+    <div class="pages">
+      @for (page of document.pages; track page.number) {
+        <div class="page" #pageEl [attr.data-page-number]="page.number">
+          <div class="page-content">
+            <img
+              [ngSrc]="page.imageUrl"
+              [priority]="page.number === 1"
+              fill
+              [attr.alt]="page.number"
+            />
+          </div>
+          <div class="page-footer">
+            {{ page.number }}
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
