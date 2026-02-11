@@ -59,6 +59,21 @@ export class DocumentViewer implements OnDestroy {
     return $localize`:@@pageIndicator:Страница ${current}:current: из ${total}:total:`;
   });
 
+  protected readonly zoomStep = 0.25;
+  protected readonly zoomSelectOptions = computed(() => {
+    return Array(10)
+      .fill(0)
+      .map((_, i) => (i + 1) * this.zoomStep);
+  });
+  protected readonly minZoom = computed(() => this.zoomSelectOptions().at(0)!);
+  protected readonly maxZoom = computed(() => this.zoomSelectOptions().at(-1)!);
+
+  protected readonly zoomLevel = signal(1);
+  protected readonly canZoomIn = computed(() => this.zoomLevel() < this.maxZoom());
+  protected readonly canZoomOut = computed(() => this.zoomLevel() > this.minZoom());
+
+  protected readonly zoomPercentage = computed(() => Math.round(this.zoomLevel() * 100));
+
   constructor() {
     effect(() => {
       const pages = this.pageElements();
@@ -87,5 +102,35 @@ export class DocumentViewer implements OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+  }
+
+  protected zoomIn(): void {
+    this.applyZoom(Math.min(this.zoomLevel() + this.zoomStep, this.maxZoom()));
+  }
+
+  protected zoomOut(): void {
+    this.applyZoom(Math.max(this.zoomLevel() - this.zoomStep, this.minZoom()));
+  }
+
+  protected onZoomChange(evt: Event): void {
+    const select = evt.target as HTMLSelectElement;
+    const percentage = Number(select.value);
+    this.applyZoom(percentage / 100);
+  }
+
+  private applyZoom(newZoom: number): void {
+    const container = this.scrollContainer()?.nativeElement;
+    this.zoomLevel.set(newZoom);
+
+    if (!container || container.scrollHeight <= 0) {
+      return;
+    }
+
+    const scrollRatio = container.scrollTop / container.scrollHeight;
+
+    // To prevent flickering, we need to wait for the next animation frame
+    requestAnimationFrame(() => {
+      container.scrollTop = scrollRatio * container.scrollHeight;
+    });
   }
 }

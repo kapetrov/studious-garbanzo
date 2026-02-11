@@ -38,21 +38,24 @@
 
 .document-area {
   flex-grow: 1;
-  overflow-y: auto;
+  overflow: auto;
   background: var(--color-background);
+}
+
+.zoom-wrapper {
+  zoom: var(--zoom-level, 1);
 }
 
 .pages {
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding: 24px 12px;
   gap: 10px;
 }
 
 .page {
-  max-width: var(--page-max-width);
-  width: 100%;
+  width: var(--page-max-width);
+  margin: auto;
 
   border-radius: 4px;
   background: var(--color-surface);
@@ -91,4 +94,66 @@
 
 .error-state {
   color: var(--color-text-subtle);
+}
+
+.zoom-controls {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px;
+
+  background: var(--color-surface);
+  border-radius: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.zoom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  aspect-ratio: 1;
+
+  font-size: 18px;
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border);
+  border-radius: 50%;
+  background: var(--color-surface);
+
+  cursor: pointer;
+
+  &:not(:disabled) {
+    &:hover,
+    &:focus {
+      background: var(--color-background);
+    }
+  }
+
+  &:disabled {
+    color: var(--color-text-subtle);
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.zoom-select {
+  padding: 4px 8px;
+  height: 32px;
+
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--color-text);
+
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--color-surface);
+
+  cursor: pointer;
 }

@@ -17,22 +17,56 @@
       <p>{{ error() }}</p>
     </div>
   } @else if (document(); as document) {
-    <div class="pages">
-      @for (page of document.pages; track page.number) {
-        <div class="page" #pageEl [attr.data-page-number]="page.number">
-          <div class="page-content">
-            <img
-              [ngSrc]="page.imageUrl"
-              [priority]="page.number === 1"
-              fill
-              [attr.alt]="page.number"
-            />
+    <div class="zoom-wrapper" [style.--zoom-level]="zoomLevel()">
+      <div class="pages">
+        @for (page of document.pages; track page.number) {
+          <div class="page" #pageEl [attr.data-page-number]="page.number">
+            <div class="page-content">
+              <img
+                [ngSrc]="page.imageUrl"
+                [priority]="page.number === 1"
+                fill
+                [attr.alt]="page.number"
+              />
+            </div>
+            <div class="page-footer">
+              {{ page.number }}
+            </div>
           </div>
-          <div class="page-footer">
-            {{ page.number }}
-          </div>
-        </div>
-      }
+        }
+      </div>
     </div>
   }
 </div>
+@if (document()) {
+  <div class="zoom-controls">
+    <button
+      type="button"
+      class="zoom-button"
+      (click)="zoomOut()"
+      [disabled]="!canZoomOut()"
+      aria-label="Увеличить масштбаб"
+      i18n-aria-label="@@zoomOutLabel"
+    >−</button>
+    <select
+      class="zoom-select"
+      [value]="zoomPercentage()"
+      (change)="onZoomChange($event)"
+      aria-label="Масштаб"
+      i18n-aria-label="@@zoomLevelLabel"
+    >
+      @for (level of zoomSelectOptions(); track level) {
+        @let percentage = level * 100;
+        <option [attr.value]="percentage">{{ percentage }}%</option>
+      }
+    </select>
+    <button
+      type="button"
+      class="zoom-button"
+      (click)="zoomIn()"
+      [disabled]="!canZoomIn()"
+      aria-label="Уменьшить масштбаб"
+      i18n-aria-label="@@zoomInLabel"
+    >+</button>
+  </div>
+}
