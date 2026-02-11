@@ -11,7 +11,17 @@
   "projects": {
     "doc-viewer": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "i18n": {
+        "sourceLocale": "ru",
+        "locales": {
+          "en": "src/locale/messages.en.xlf"
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -25,10 +35,18 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "api",
+                "output": "/api"
               }
             ],
             "styles": [
-              "src/styles.css"
+              "src/styles.scss"
+            ],
+            "polyfills": [
+              "@angular/localize/init"
             ]
           },
           "configurations": {
@@ -51,6 +69,9 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "en": {
+              "localize": ["en"]
             }
           },
           "defaultConfiguration": "production"
@@ -63,6 +84,9 @@
             },
             "development": {
               "buildTarget": "doc-viewer:build:development"
+            },
+            "en": {
+              "buildTarget": "doc-viewer:build:en"
             }
           },
           "defaultConfiguration": "development"
