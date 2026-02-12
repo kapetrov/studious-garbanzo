@@ -9,7 +9,8 @@
     "test": "ng test",
     "lint": "ng lint",
     "format": "prettier --write \"src/**/*.{ts,html,css,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\""
+    "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\"",
+    "deploy": "ng deploy --base-href=/studious-garbanzo/"
   },
   "prettier": {
     "printWidth": 100,
@@ -40,6 +41,7 @@
     "@angular/cli": "^21.1.3",
     "@angular/compiler-cli": "^21.1.0",
     "@angular/localize": "^21.1.3",
+    "angular-cli-ghpages": "^3.0.2",
     "angular-eslint": "21.2.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",

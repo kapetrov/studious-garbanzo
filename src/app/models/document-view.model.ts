@@ -15,7 +15,7 @@ export function toDocumentView(doc: Document): DocumentView {
     name: doc.name,
     pages: doc.pages.map((page) => ({
       number: page.number,
-      imageUrl: `/api/${page.imageUrl}`,
+      imageUrl: `api/${page.imageUrl}`,
     })),
   };
 }

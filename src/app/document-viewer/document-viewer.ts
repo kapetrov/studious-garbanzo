@@ -35,7 +35,7 @@ export class DocumentViewer implements OnDestroy {
   private readonly pageElements = viewChildren<ElementRef<HTMLDivElement>>('pageEl');
   private observer?: IntersectionObserver;
 
-  private readonly documentResource = httpResource<Document>(() => `/api/${this.id()}.json`);
+  private readonly documentResource = httpResource<Document>(() => `api/${this.id()}.json`);
 
   protected readonly document = computed<DocumentView | null>(() =>
     this.documentResource.hasValue() ? toDocumentView(this.documentResource.value()!) : null,
