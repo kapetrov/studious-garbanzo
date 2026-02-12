@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
+    "i18n:extract": "ng extract-i18n --output-path src/locale",
     "format": "prettier --write \"src/**/*.{ts,html,css,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,html,css,json}\"",
     "deploy": "ng deploy --base-href=/studious-garbanzo/"
