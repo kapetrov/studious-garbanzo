@@ -11,7 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 25px;
+  padding: 10px 12px;
   height: var(--toolbar-height);
 
   background: var(--color-surface);
@@ -55,6 +55,7 @@
 
 .page {
   width: var(--page-max-width);
+  max-width: calc(100vw - 20px);
   margin: auto;
 
   border-radius: 4px;
