@@ -21,7 +21,6 @@ export class AnnotationDialog {
   public cancelAnnotation = output<void>();
 
   protected mode = signal<AnnotationType>('text');
-  protected imagePreview = signal<string | null>(null);
 
   protected form: NewAnnotationForm = new FormGroup(
     {
@@ -48,9 +47,11 @@ export class AnnotationDialog {
 
     if (mode === 'text') {
       this.form.controls.imageBase64.clearValidators();
+      this.form.controls.imageBase64.setValue(null);
       this.form.controls.text.setValidators([Validators.required]);
     } else {
       this.form.controls.text.clearValidators();
+      this.form.controls.text.setValue(null);
       this.form.controls.imageBase64.setValidators([Validators.required]);
     }
   }
@@ -58,15 +59,10 @@ export class AnnotationDialog {
   protected onFileChange(evt: Event): void {
     const input = evt.target as HTMLInputElement;
 
-    if (!input.files?.length) {
-      this.imagePreview.set(null);
-      return;
-    }
-
-    const file = input.files[0];
+    const file = input.files?.[0];
 
     if (!file) {
-      this.imagePreview.set(null);
+      this.form.controls.imageBase64.setValue(null);
       return;
     }
 
