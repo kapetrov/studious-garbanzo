@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { AnnotationType } from '../../../models/annotation.model';
 
 @Component({
   selector: 'app-annotation',
@@ -11,7 +12,9 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   },
 })
 export class Annotation {
-  public text = input.required<string>();
+  public type = input<AnnotationType>('text');
+  public text = input<string>();
+  public imageUrl = input<string>();
   public x = input.required<number>();
   public y = input.required<number>();
 

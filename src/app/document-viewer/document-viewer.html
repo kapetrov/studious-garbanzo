@@ -33,7 +33,9 @@
               @if (pageAnnotations) {
                 @for (annotation of pageAnnotations; track annotation.id) {
                   <app-annotation
+                    [type]="annotation.type"
                     [text]="annotation.text"
+                    [imageUrl]="annotation.imageUrl"
                     [x]="annotation.x"
                     [y]="annotation.y"
                     (click)="$event.stopPropagation()"

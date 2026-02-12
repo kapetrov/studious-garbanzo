@@ -20,6 +20,7 @@ import { Annotation } from './components/annotation/annotation';
 import { AnnotationDialog } from './components/annotation-dialog/annotation-dialog';
 import { generateUUID } from '../shared/utils/generate-uuid';
 import { PendingAnnotation } from './document-viewer.model';
+import { NewAnnotationPayload } from './components/annotation-dialog/annotation-dialog.model';
 
 @Component({
   selector: 'app-document-viewer',
@@ -165,14 +166,21 @@ export class DocumentViewer implements OnDestroy {
     this.pendingAnnotation.set({ pageNumber, x, y });
   }
 
-  protected addAnnotation(text: string): void {
+  protected addAnnotation(payload: NewAnnotationPayload): void {
     const pending = this.pendingAnnotation();
 
     if (!pending) {
       return;
     }
 
-    this.annotations.update((items) => [...items, { id: generateUUID(), text, ...pending }]);
+    this.annotations.update((items) => [
+      ...items,
+      {
+        id: generateUUID(),
+        ...pending,
+        ...payload,
+      },
+    ]);
     this.pendingAnnotation.set(null);
   }
 

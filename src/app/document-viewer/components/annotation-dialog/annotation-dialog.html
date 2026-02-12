@@ -7,18 +7,45 @@
     (keydown)="$event.stopPropagation()"
   >
     <h2 i18n="@@addAnnotationTitle">Добавить аннотацию</h2>
-    <div class="input-wrapper">
-      <input
-        type="text"
-        formControlName="text"
-        placeholder="Введите текст"
-        i18n-placeholder="@@annotationTextPlaceholder"
-      />
-      @let control = form.controls.text;
-      @if (control.touched && control.invalid) {
-        <span class="error" i18n="@@annotationTextRequired">Необходимо добавить текст аннотации</span>
-      }
+    <div class="mode-tabs">
+      <button
+        type="button"
+        [class.active]="mode() === 'text'"
+        (click)="setMode('text')"
+        i18n="@@annotationModeText"
+      >Текст</button>
+      <button
+        type="button"
+        [class.active]="mode() === 'image'"
+        (click)="setMode('image')"
+        i18n="@@annotationModeImage"
+      >Изображение</button>
     </div>
+    @if (mode() === 'text') {
+      <div class="input-wrapper">
+        <input
+          class="text-input"
+          type="text"
+          formControlName="text"
+          placeholder="Введите текст"
+          i18n-placeholder="@@annotationTextPlaceholder"
+        />
+        @let control = form.controls.text;
+        @if (control.touched && control.invalid) {
+          <span class="error" i18n="@@annotationTextRequired">Необходимо добавить текст аннотации</span>
+        }
+      </div>
+    } @else {
+      <div class="input-wrapper">
+        <input
+          type="file"
+          (change)="onFileChange($event)"
+        />
+        @if (imagePreview(); as preview) {
+          <img class="image-preview" [src]="preview" alt="Превью картинки аннотации" />
+        }
+      </div>
+    }
     <div class="actions">
       <button
         type="button"

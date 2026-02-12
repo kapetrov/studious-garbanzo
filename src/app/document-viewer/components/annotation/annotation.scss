@@ -7,31 +7,44 @@
   display: flex;
   gap: 5px;
   padding: 5px 10px;
+  padding-right: 0;
   max-width: 200px;
 
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: var(--shadow-card);
   cursor: default;
+
 }
 
 .text {
   word-wrap: break-word;
 }
 
+.image {
+  min-width: 0;
+  max-height: 180px;
+  display: block;
+  border-radius: 2px;
+  object-fit: contain;
+}
+
 .delete {
+  width: 25px;
+  height: 25px;
   flex-shrink: 0;
   padding: 0;
-  width: 18px;
-  height: 18px;
+
   font-size: 10px;
-  border: none;
-  border-radius: 3px;
-  background: transparent;
+  line-height: 1;
   color: var(--color-text-subtle);
 
-  &:hover {
-    background: var(--color-background);
+  border: none;
+  background: transparent;
+
+  &:hover,
+  &:focus {
+    color: var(--color-text);
   }
 }
