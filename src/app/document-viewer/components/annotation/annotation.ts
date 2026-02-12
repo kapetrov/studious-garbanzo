@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output, computed } from '@angular/core';
-import { AnnotationType } from '../../../models/annotation.model';
+import { AnnotationType } from '../../models/annotation.model';
 
 @Component({
   selector: 'app-annotation',

@@ -14,24 +14,25 @@ import { httpResource } from '@angular/common/http';
 import { NgOptimizedImage } from '@angular/common';
 
 import { Spinner } from '../shared/components/spinner/spinner';
-import { Document } from '../models/document.model';
-import { DocumentView, toDocumentView } from '../models/document-view.model';
-import { Annotation as AnnotationModel } from '../models/annotation.model';
+import { Document } from '../core/models/document.model';
+import { DocumentView, toDocumentView } from './models/document-view.model';
+import { AnnotationModel } from './models/annotation.model';
 import { Annotation } from './components/annotation/annotation';
 import { AnnotationDialog } from './components/annotation-dialog/annotation-dialog';
 import { Draggable, DragPosition } from '../shared/directives/draggable.directive';
-import { PendingAnnotation } from './document-viewer.model';
+import { ZoomControls } from './components/zoom-controls/zoom-controls';
+import { PendingAnnotation } from './models/annotation.model';
 import { NewAnnotationPayload } from './components/annotation-dialog/annotation-dialog.model';
 
 @Component({
   selector: 'app-document-viewer',
-  imports: [NgOptimizedImage, Spinner, Annotation, AnnotationDialog, Draggable],
+  imports: [NgOptimizedImage, Spinner, Annotation, AnnotationDialog, Draggable, ZoomControls],
   templateUrl: './document-viewer.html',
   styleUrl: './document-viewer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DocumentViewer implements OnDestroy {
-  readonly id = input.required<string>(); // from router
+  public readonly id = input.required<string>(); // from router
 
   private readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
   private readonly pageElements = viewChildren<ElementRef<HTMLDivElement>>('pageEl');
@@ -143,13 +144,7 @@ export class DocumentViewer implements OnDestroy {
     this.applyZoom(Math.max(this.zoomLevel() - this.zoomStep, this.minZoom()));
   }
 
-  protected onZoomChange(evt: Event): void {
-    const select = evt.target as HTMLSelectElement;
-    const percentage = Number(select.value);
-    this.applyZoom(percentage / 100);
-  }
-
-  private applyZoom(newZoom: number): void {
+  protected applyZoom(newZoom: number): void {
     const container = this.scrollContainer()?.nativeElement;
     this.zoomLevel.set(newZoom);
 

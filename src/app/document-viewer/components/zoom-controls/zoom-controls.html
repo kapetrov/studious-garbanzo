@@ -1,0 +1,36 @@
+<button
+  type="button"
+  class="zoom-button"
+  (click)="zoomOut.emit()"
+  [disabled]="!canZoomOut()"
+  aria-label="Уменьшить масштаб"
+  i18n-aria-label="@@zoomOutLabel"
+>
+  −
+</button>
+<select
+  class="zoom-select"
+  [value]="zoomPercentage()"
+  (change)="onSelectChange($event)"
+  aria-label="Масштаб"
+  i18n-aria-label="@@zoomLevelLabel"
+>
+  @for (level of options(); track level) {
+    @let percentage = level * 100;
+    <option
+      [value]="percentage"
+      [selected]="percentage === zoomPercentage()"
+    >{{ percentage }}%
+    </option>
+  }
+</select>
+<button
+  type="button"
+  class="zoom-button"
+  (click)="zoomIn.emit()"
+  [disabled]="!canZoomIn()"
+  aria-label="Увеличить масштаб"
+  i18n-aria-label="@@zoomInLabel"
+>
+  +
+</button>

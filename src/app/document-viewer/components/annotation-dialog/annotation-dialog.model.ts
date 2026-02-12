@@ -1,5 +1,5 @@
 import { FormControl, FormGroup } from '@angular/forms';
-import { AnnotationType } from '../../../models/annotation.model';
+import { AnnotationType } from '../../models/annotation.model';
 
 export type NewAnnotationForm = FormGroup<{
   text: FormControl<string | null>;

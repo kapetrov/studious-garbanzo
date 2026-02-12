@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { NewAnnotationPayload, NewAnnotationForm } from './annotation-dialog.model';
-import { AnnotationType } from '../../../models/annotation.model';
+import { AnnotationType } from '../../models/annotation.model';
 
 @Component({
   selector: 'app-annotation-dialog',

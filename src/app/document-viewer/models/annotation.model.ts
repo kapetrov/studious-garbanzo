@@ -1,6 +1,6 @@
 export type AnnotationType = 'text' | 'image';
 
-export interface Annotation {
+export interface AnnotationModel {
   id: string;
   type: AnnotationType;
   pageNumber: number;
@@ -8,4 +8,10 @@ export interface Annotation {
   y: number;
   text?: string;
   imageUrl?: string;
+}
+
+export interface PendingAnnotation {
+  pageNumber: number;
+  x: number;
+  y: number;
 }

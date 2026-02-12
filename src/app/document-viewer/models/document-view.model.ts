@@ -1,4 +1,4 @@
-import { Document } from './document.model';
+import { Document } from '../../core/models/document.model';
 
 export interface PageView {
   number: number;

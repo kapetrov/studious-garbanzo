@@ -69,42 +69,15 @@
   }
 </div>
 @if (document()) {
-  <div class="zoom-controls">
-    <button
-      type="button"
-      class="zoom-button"
-      (click)="zoomOut()"
-      [disabled]="!canZoomOut()"
-      aria-label="Увеличить масштбаб"
-      i18n-aria-label="@@zoomOutLabel"
-    >
-      −
-    </button>
-    <select
-      class="zoom-select"
-      [value]="zoomPercentage()"
-      (change)="onZoomChange($event)"
-      aria-label="Масштаб"
-      i18n-aria-label="@@zoomLevelLabel"
-    >
-      @for (level of zoomSelectOptions(); track level) {
-        @let percentage = level * 100;
-        <option [value]="percentage" [selected]="percentage === zoomPercentage()">
-          {{ percentage }}%
-        </option>
-      }
-    </select>
-    <button
-      type="button"
-      class="zoom-button"
-      (click)="zoomIn()"
-      [disabled]="!canZoomIn()"
-      aria-label="Уменьшить масштбаб"
-      i18n-aria-label="@@zoomInLabel"
-    >
-      +
-    </button>
-  </div>
+  <app-zoom-controls
+    [zoomPercentage]="zoomPercentage()"
+    [canZoomIn]="canZoomIn()"
+    [canZoomOut]="canZoomOut()"
+    [options]="zoomSelectOptions()"
+    (zoomIn)="zoomIn()"
+    (zoomOut)="zoomOut()"
+    (zoomChange)="applyZoom($event / 100)"
+  />
 }
 
 @if (pendingAnnotation()) {
