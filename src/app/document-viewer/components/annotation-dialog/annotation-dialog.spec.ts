@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AnnotationDialog } from './annotation-dialog';
-import { NewAnnotationPayload } from './annotation-dialog.model';
 
 describe('AnnotationDialog', () => {
   let fixture: ComponentFixture<AnnotationDialog>;
