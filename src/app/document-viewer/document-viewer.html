@@ -21,13 +21,26 @@
       <div class="pages">
         @for (page of document.pages; track page.number) {
           <div class="page" #pageEl [attr.data-page-number]="page.number">
-            <div class="page-content">
+            <div class="page-content"
+                 (click)="onPageClick($event, page.number)">
               <img
                 [ngSrc]="page.imageUrl"
                 [priority]="page.number === 1"
                 fill
                 [attr.alt]="page.number"
               />
+              @let pageAnnotations = annotationsByPage()[(page.number)];
+              @if (pageAnnotations) {
+                @for (annotation of pageAnnotations; track annotation.id) {
+                  <app-annotation
+                    [text]="annotation.text"
+                    [x]="annotation.x"
+                    [y]="annotation.y"
+                    (click)="$event.stopPropagation()"
+                    (deleteAnnotation)="deleteAnnotation(annotation.id)"
+                  />
+                }
+              }
             </div>
             <div class="page-footer">
               {{ page.number }}
@@ -57,7 +70,10 @@
     >
       @for (level of zoomSelectOptions(); track level) {
         @let percentage = level * 100;
-        <option [attr.value]="percentage">{{ percentage }}%</option>
+        <option
+          [value]="percentage"
+          [selected]="percentage === zoomPercentage()"
+        >{{ percentage }}%</option>
       }
     </select>
     <button
@@ -69,4 +85,11 @@
       i18n-aria-label="@@zoomInLabel"
     >+</button>
   </div>
+}
+
+@if (pendingAnnotation()) {
+  <app-annotation-dialog
+    (confirm)="addAnnotation($event)"
+    (cancelAnnotation)="cancelAnnotation()"
+  />
 }

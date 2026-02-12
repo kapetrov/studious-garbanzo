@@ -12,13 +12,18 @@ import {
 } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { NgOptimizedImage } from '@angular/common';
-import { Spinner } from '../spinner/spinner';
+import { Spinner } from '../shared/components/spinner/spinner';
 import { Document } from '../models/document.model';
 import { DocumentView, toDocumentView } from '../models/document-view.model';
+import { Annotation as AnnotationModel } from '../models/annotation.model';
+import { Annotation } from './components/annotation/annotation';
+import { AnnotationDialog } from './components/annotation-dialog/annotation-dialog';
+import { generateUUID } from '../shared/utils/generate-uuid';
+import { PendingAnnotation } from './document-viewer.model';
 
 @Component({
   selector: 'app-document-viewer',
-  imports: [NgOptimizedImage, Spinner],
+  imports: [NgOptimizedImage, Spinner, Annotation, AnnotationDialog],
   templateUrl: './document-viewer.html',
   styleUrl: './document-viewer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,8 +51,19 @@ export class DocumentViewer implements OnDestroy {
     return error.message;
   });
   protected readonly currentPageNumber = signal(1);
+  protected readonly annotations = signal<AnnotationModel[]>([]);
+  protected readonly pendingAnnotation = signal<PendingAnnotation | null>(null);
 
   protected readonly totalPages = computed(() => this.document()?.pages.length ?? 0);
+  protected readonly annotationsByPage = computed(() => {
+    return this.annotations().reduce<Record<number, AnnotationModel[]>>(
+      (prev, curr) => ({
+        ...prev,
+        [curr.pageNumber]: [...(prev[curr.pageNumber] ?? []), curr],
+      }),
+      {},
+    );
+  });
   protected readonly pageIndicator = computed(() => {
     const total = this.totalPages();
 
@@ -131,6 +147,42 @@ export class DocumentViewer implements OnDestroy {
     // To prevent flickering, we need to wait for the next animation frame
     requestAnimationFrame(() => {
       container.scrollTop = scrollRatio * container.scrollHeight;
+    });
+  }
+
+  protected onPageClick(event: MouseEvent, pageNumber: number): void {
+    const pageElement = event.currentTarget as HTMLElement;
+    const rect = pageElement.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 100;
+    const y = ((event.clientY - rect.top) / rect.height) * 100;
+    console.log({ pageNumber, x, y, rect });
+
+    if (x < 0 || x > 100 || y < 0 || y > 100) {
+      console.log({ x, y })
+      return;
+    }
+
+    this.pendingAnnotation.set({ pageNumber, x, y });
+  }
+
+  protected addAnnotation(text: string): void {
+    const pending = this.pendingAnnotation();
+
+    if (!pending) {
+      return;
+    }
+
+    this.annotations.update((items) => [...items, { id: generateUUID(), text, ...pending }]);
+    this.pendingAnnotation.set(null);
+  }
+
+  protected cancelAnnotation(): void {
+    this.pendingAnnotation.set(null);
+  }
+
+  protected deleteAnnotation(id: string): void {
+    this.annotations.update((list) => {
+      return list.filter((item) => item.id !== id);
     });
   }
 }

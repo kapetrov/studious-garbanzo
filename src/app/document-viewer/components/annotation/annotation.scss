@@ -1,0 +1,36 @@
+:host {
+  position: absolute;
+  z-index: 5;
+  left: var(--annotation-x);
+  top: var(--annotation-y);
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+  max-width: 200px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  box-shadow: var(--shadow-card);
+  cursor: default;
+  font-size: 13px;
+}
+
+.text {
+  word-wrap: break-word;
+}
+
+.delete {
+  flex-shrink: 0;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  font-size: 10px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--color-text-subtle);
+
+  &:hover {
+    background: var(--color-background);
+  }
+}

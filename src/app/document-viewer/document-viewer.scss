@@ -68,6 +68,8 @@
   position: relative;
   aspect-ratio: 21 / 29.7; // a4 is 21cm x 29.7cm
 
+  cursor: text;
+
   img {
     user-select: none;
   }
@@ -127,8 +129,6 @@
   border-radius: 50%;
   background: var(--color-surface);
 
-  cursor: pointer;
-
   &:not(:disabled) {
     &:hover,
     &:focus {
@@ -147,7 +147,6 @@
   padding: 4px 8px;
   height: 32px;
 
-  font-family: inherit;
   font-size: 13px;
   color: var(--color-text);
 
@@ -157,3 +156,4 @@
 
   cursor: pointer;
 }
+

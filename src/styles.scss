@@ -1,6 +1,7 @@
 :root {
   --color-text: #333333;
   --color-text-subtle: #888888;
+  --color-text-danger: #d32f2f;
   --color-surface: #ffffff;
   --color-background: #f0f0f0;
   --color-border: #e0e0e0;
@@ -25,4 +26,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--color-background);
   color: var(--color-text);
+}
+
+button {
+  font-family: inherit;
+
+  &:not(:disabled) {
+    cursor: pointer;
+  }
 }

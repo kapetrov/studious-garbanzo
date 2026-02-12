@@ -1,0 +1,36 @@
+<div class="overlay">
+  <form
+    class="dialog"
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    (click)="$event.stopPropagation()"
+    (keydown)="$event.stopPropagation()"
+  >
+    <h2 i18n="@@addAnnotationTitle">Добавить аннотацию</h2>
+    <div class="input-wrapper">
+      <input
+        type="text"
+        formControlName="text"
+        placeholder="Введите текст"
+        i18n-placeholder="@@annotationTextPlaceholder"
+      />
+      @let control = form.controls.text;
+      @if (control.touched && control.invalid) {
+        <span class="error" i18n="@@annotationTextRequired">Необходимо добавить текст аннотации</span>
+      }
+    </div>
+    <div class="actions">
+      <button
+        type="button"
+        (click)="cancelAnnotation.emit()"
+        i18n="@@cancelButton"
+      >Отмена</button>
+      <button
+        type="submit"
+        class="primary"
+        i18n="@@addButton"
+        [disabled]="form.invalid"
+      >Добавить</button>
+    </div>
+  </form>
+</div>
