@@ -4,6 +4,14 @@
     @if (pageIndicator(); as pageIndicator) {
       <span class="page-indicator">{{ pageIndicator }}</span>
     }
+    <button
+      type="button"
+      class="save-button"
+      [disabled]="!canSaveDocument()"
+      (click)="saveDocument()"
+    >
+      {{ saveButtonText() }}
+    </button>
   </header>
 }
 <div class="document-area" #scrollContainer>
@@ -21,15 +29,14 @@
       <div class="pages">
         @for (page of document.pages; track page.number) {
           <div class="page" #pageEl [attr.data-page-number]="page.number">
-            <div class="page-content"
-                 (click)="onPageClick($event, page.number)">
+            <div class="page-content" #pageContent (click)="onPageClick($event, page.number)">
               <img
                 [ngSrc]="page.imageUrl"
                 [priority]="page.number === 1"
                 fill
                 [attr.alt]="page.number"
               />
-              @let pageAnnotations = annotationsByPage()[(page.number)];
+              @let pageAnnotations = annotationsByPage()[page.number];
               @if (pageAnnotations) {
                 @for (annotation of pageAnnotations; track annotation.id) {
                   <app-annotation
@@ -38,6 +45,8 @@
                     [imageUrl]="annotation.imageUrl"
                     [x]="annotation.x"
                     [y]="annotation.y"
+                    [isDragging]="draggingAnnotationId() === annotation.id"
+                    (pointerdown)="onAnnotationPointerDown($event, annotation, pageContent)"
                     (click)="$event.stopPropagation()"
                     (deleteAnnotation)="deleteAnnotation(annotation.id)"
                   />
@@ -62,7 +71,9 @@
       [disabled]="!canZoomOut()"
       aria-label="Увеличить масштбаб"
       i18n-aria-label="@@zoomOutLabel"
-    >−</button>
+    >
+      −
+    </button>
     <select
       class="zoom-select"
       [value]="zoomPercentage()"
@@ -72,10 +83,9 @@
     >
       @for (level of zoomSelectOptions(); track level) {
         @let percentage = level * 100;
-        <option
-          [value]="percentage"
-          [selected]="percentage === zoomPercentage()"
-        >{{ percentage }}%</option>
+        <option [value]="percentage" [selected]="percentage === zoomPercentage()">
+          {{ percentage }}%
+        </option>
       }
     </select>
     <button
@@ -85,7 +95,9 @@
       [disabled]="!canZoomIn()"
       aria-label="Уменьшить масштбаб"
       i18n-aria-label="@@zoomInLabel"
-    >+</button>
+    >
+      +
+    </button>
   </div>
 }
 
