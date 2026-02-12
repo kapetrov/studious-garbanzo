@@ -17,10 +17,8 @@
 >
   @for (level of options(); track level) {
     @let percentage = level * 100;
-    <option
-      [value]="percentage"
-      [selected]="percentage === zoomPercentage()"
-    >{{ percentage }}%
+    <option [value]="percentage" [selected]="percentage === zoomPercentage()">
+      {{ percentage }}%
     </option>
   }
 </select>
