@@ -2,10 +2,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
   ElementRef,
-  inject,
   input,
   OnDestroy,
   signal,
@@ -14,21 +12,20 @@ import {
 } from '@angular/core';
 import { httpResource } from '@angular/common/http';
 import { NgOptimizedImage } from '@angular/common';
-import { fromEvent, switchMap, map, takeUntil, tap, EMPTY } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { Spinner } from '../shared/components/spinner/spinner';
 import { Document } from '../models/document.model';
 import { DocumentView, toDocumentView } from '../models/document-view.model';
 import { Annotation as AnnotationModel } from '../models/annotation.model';
 import { Annotation } from './components/annotation/annotation';
 import { AnnotationDialog } from './components/annotation-dialog/annotation-dialog';
-import { generateUUID } from '../shared/utils/generate-uuid';
+import { Draggable, DragPosition } from '../shared/directives/draggable.directive';
 import { PendingAnnotation } from './document-viewer.model';
 import { NewAnnotationPayload } from './components/annotation-dialog/annotation-dialog.model';
 
 @Component({
   selector: 'app-document-viewer',
-  imports: [NgOptimizedImage, Spinner, Annotation, AnnotationDialog],
+  imports: [NgOptimizedImage, Spinner, Annotation, AnnotationDialog, Draggable],
   templateUrl: './document-viewer.html',
   styleUrl: './document-viewer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,7 +36,7 @@ export class DocumentViewer implements OnDestroy {
   private readonly scrollContainer = viewChild<ElementRef<HTMLDivElement>>('scrollContainer');
   private readonly pageElements = viewChildren<ElementRef<HTMLDivElement>>('pageEl');
   private observer?: IntersectionObserver;
-  private readonly destroyRef = inject(DestroyRef);
+  private saveTimeoutId?: ReturnType<typeof setTimeout>;
 
   private readonly documentResource = httpResource<Document>(() => `api/${this.id()}.json`);
 
@@ -67,13 +64,19 @@ export class DocumentViewer implements OnDestroy {
     () => this.document() !== null && this.annotations().length > 0,
   );
   protected readonly annotationsByPage = computed(() => {
-    return this.annotations().reduce<Record<number, AnnotationModel[]>>(
-      (prev, curr) => ({
-        ...prev,
-        [curr.pageNumber]: [...(prev[curr.pageNumber] ?? []), curr],
-      }),
-      {},
-    );
+    const map = new Map<number, AnnotationModel[]>();
+
+    for (const annotation of this.annotations()) {
+      const listByPage = map.get(annotation.pageNumber);
+
+      if (listByPage) {
+        listByPage.push(annotation);
+      } else {
+        map.set(annotation.pageNumber, [annotation]);
+      }
+    }
+
+    return map;
   });
   protected readonly pageIndicator = computed(() => {
     const total = this.totalPages();
@@ -129,6 +132,7 @@ export class DocumentViewer implements OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    clearTimeout(this.saveTimeoutId);
   }
 
   protected zoomIn(): void {
@@ -186,7 +190,7 @@ export class DocumentViewer implements OnDestroy {
     this.annotations.update((items) => [
       ...items,
       {
-        id: generateUUID(),
+        id: crypto.randomUUID(),
         ...pending,
         ...payload,
       },
@@ -204,61 +208,21 @@ export class DocumentViewer implements OnDestroy {
     });
   }
 
-  protected onAnnotationPointerDown(
-    evt: PointerEvent,
-    annotation: AnnotationModel,
-    pageEl: HTMLElement,
-  ): void {
-    evt.preventDefault();
-    evt.stopPropagation();
-
-    this.draggingAnnotationId.set(annotation.id);
-
-    const startX = annotation.x;
-    const startY = annotation.y;
-    const pageRect = pageEl.getBoundingClientRect();
-
-    const pointerMove$ = fromEvent<PointerEvent>(document, 'pointermove');
-    const pointerUp$ = fromEvent<PointerEvent>(document, 'pointerup');
-
-    /*
-      Мы храним координаты аннотаций в %, чтобы при изменении zoomLevel/resize окна они не поплыли
-      Логика рассчета такая:
-        1. Вычислить дельту - на сколько курсор сдвинулся от изначальной позиции, когда сработал pointermove, до текущей позиции
-        2. Перевожу эту дельту в проценты, поделив на ширину (для х) и высоту (для у) страницы, умножаю на 100%, чтобы удобно скормить аннотации с целью позиционирования
-        3. Прибавляю новую дельту к ранее записанной x/y координате аннотации
-      Результат: { newX: startX + (deltaPixelsX / pageWidthPx) * 100, newY: startY + (deltaPixelsY / pageHeightPx) * 100 }
-    */
-    pointerMove$
-      .pipe(
-        map((move) => ({
-          x: startX + ((move.clientX - evt.clientX) / pageRect.width) * 100,
-          y: startY + ((move.clientY - evt.clientY) / pageRect.height) * 100,
-        })),
-        takeUntil(
-          pointerUp$.pipe(
-            tap(() => {
-              this.draggingAnnotationId.set(null);
-            }),
-          ),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe((pos) => {
-        this.updateAnnotationPosition(annotation.id, pos.x, pos.y);
-      });
-  }
-
-  private updateAnnotationPosition(id: string, x: number, y: number): void {
+  protected onAnnotationDragMove(id: string, pos: DragPosition): void {
+    this.draggingAnnotationId.set(id);
     this.annotations.update((list) => {
       return list.map((item) => {
         if (item.id === id) {
-          return { ...item, x, y };
+          return { ...item, x: pos.x, y: pos.y };
         }
 
         return item;
       });
     });
+  }
+
+  protected onAnnotationDragEnd(): void {
+    this.draggingAnnotationId.set(null);
   }
 
   protected saveDocument(): void {
@@ -278,7 +242,8 @@ export class DocumentViewer implements OnDestroy {
 
     this.saveButtonText.set($localize`Сохранено!`);
 
-    setTimeout(() => {
+    clearTimeout(this.saveTimeoutId);
+    this.saveTimeoutId = setTimeout(() => {
       this.saveButtonText.set($localize`Сохранить`);
     }, 2000);
   }

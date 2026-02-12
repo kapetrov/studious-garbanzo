@@ -48,11 +48,15 @@ export class AnnotationDialog {
     if (mode === 'text') {
       this.form.controls.imageBase64.clearValidators();
       this.form.controls.imageBase64.setValue(null);
+      this.form.controls.imageBase64.updateValueAndValidity();
       this.form.controls.text.setValidators([Validators.required]);
+      this.form.controls.text.updateValueAndValidity();
     } else {
       this.form.controls.text.clearValidators();
       this.form.controls.text.setValue(null);
+      this.form.controls.text.updateValueAndValidity();
       this.form.controls.imageBase64.setValidators([Validators.required]);
+      this.form.controls.imageBase64.updateValueAndValidity();
     }
   }
 
@@ -72,6 +76,9 @@ export class AnnotationDialog {
         text: null,
         imageBase64: reader.result as string,
       });
+    };
+    reader.onerror = () => {
+      this.form.controls.imageBase64.setValue(null);
     };
     reader.readAsDataURL(file);
   }

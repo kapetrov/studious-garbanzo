@@ -29,6 +29,7 @@
       <div class="pages">
         @for (page of document.pages; track page.number) {
           <div class="page" #pageEl [attr.data-page-number]="page.number">
+            <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events, @angular-eslint/template/interactive-supports-focus -->
             <div class="page-content" #pageContent (click)="onPageClick($event, page.number)">
               <img
                 [ngSrc]="page.imageUrl"
@@ -36,17 +37,22 @@
                 fill
                 [attr.alt]="page.number"
               />
-              @let pageAnnotations = annotationsByPage()[page.number];
+              @let pageAnnotations = annotationsByPage().get(page.number);
               @if (pageAnnotations) {
                 @for (annotation of pageAnnotations; track annotation.id) {
                   <app-annotation
+                    appDraggable
+                    [dragContainer]="pageContent"
+                    [dragX]="annotation.x"
+                    [dragY]="annotation.y"
                     [type]="annotation.type"
                     [text]="annotation.text"
                     [imageUrl]="annotation.imageUrl"
                     [x]="annotation.x"
                     [y]="annotation.y"
                     [isDragging]="draggingAnnotationId() === annotation.id"
-                    (pointerdown)="onAnnotationPointerDown($event, annotation, pageContent)"
+                    (dragMove)="onAnnotationDragMove(annotation.id, $event)"
+                    (dragEnd)="onAnnotationDragEnd()"
                     (click)="$event.stopPropagation()"
                     (deleteAnnotation)="deleteAnnotation(annotation.id)"
                   />

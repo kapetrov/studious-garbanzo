@@ -43,7 +43,11 @@
       </div>
     } @else {
       <div class="input-wrapper">
-        <input type="file" (change)="onFileChange($event)" />
+        <input
+          type="file"
+          accept="image/*"
+          (change)="onFileChange($event)"
+        />
         @let imageBase64 = form.controls.imageBase64.value;
         @if (imageBase64) {
           <img class="image-preview" [src]="imageBase64" alt="Превью картинки аннотации" />
