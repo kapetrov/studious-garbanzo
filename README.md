@@ -1,59 +1,46 @@
-# DocViewer
+# Просмотр документов
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.3.
+Программа показывает страницы документа и позволяет оставлять на них текстовые аннотаци.
+Пометку ставится поверх изображения страницы при клике в произвольном месте. Их также можно удалять и передвигать с помощью drag
+Каждая страница это PNG или JPG-картинка.
+Увеличение применяется ко всему документу сразу.
+Каждая пометка хранит свои X и Y в процентах ширины и высоты страницы, поэтому при увеличении она растёт вместе с картинкой.
 
-## Development server
+## Почему выбраны именно такие решения
+1. Отказ от Zone.js
+   Обновление интерфейса происходит только через signals. В новом проекте нет причин тянуть лишнюю библиотеку. Одни плюсы:
+   - Бандл становится меньше на примерно 35 кБ,
+   - Пропадает, в случае чего, нужда выходить/входить в зону для хитрых обработок событий
+     Недостаток: если забыть обернуть данные в сигнал, изменения не появятся на экране. Однако, и этот позорный недостаток можно обернуть в преимущество - приходится тщательней следить за чистотой
 
-To start a local development server, run:
+2. CSS-свойство zoom вместо transform: scale()
+   - Когда применяется zoom, getBoundingClientRect() сразу возвращает размеры после масштабирования - Это убирает необходимость вручную переводить координаты указателя в масштабированные значения.
+   - IntersectionObserver тоже работает без дополнительных настроек.
+   - Свойство zoom официально не входит в стандарт CSS, но поддерживается всеми браузерами (https://caniuse.com/css-zoom)
+   - При зуме выше 300 % возможны подтормаживания из-за пересчёта раскладки, т.к. происходит серьезный layout shift, но у нас верхний предел 250 % и десяток статичных картинок - такой проблемы нет. В проекте с тысячами DOM нод пришлось бы использовать tranfsorm: scale(), т.е. он не вызывает полную перерисовку layout + хорошо оптимизируется через GPU.
+3. Процентные координаты пометок
+   Положение пометки задаётся парой чисел: x - сколько процентов от ширины страницы, y - сколько процентов от высоты. Если поменять размер страницы или увеличить документ, координаты остаются верными и пересчёты не нужны.
+4. Pointer Events вместо Mouse Events
+   Drag реализован через Pointer Events API - он одинаково работает и для мыши и тач-устройств. Не нужно дублировать обработчики для touch/mouse.
+5. Standalone-компоненты, OnPush, signals повсюду
+   Ни одного NgModule, все компоненты OnPush. Состояние хранится в сигналах, производное - в computed(). Хорошо ложится с отсутствием зоны
+6. Минимум зависимостей
+   Нет сторонних библиотек для drag-and-drop или управления состоянием. Из плюсов - проще обновляться на новую версию ангуляра, из минусов - куча непокрытых edge cases
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Известные проблемы и способы решения
+1. Нет сохранения на сервер
+   Кнопка "Сохранить" выводит JSON в консоль. При обновлении страницы все аннотации теряются.
+   *Решение:* подключить бэкенд или хотя бы localStorage для персистентности
+2. Нет обработки ошибок загрузки изображений
+   Если картинка страницы не загрузится, пользователь увидит стандартную иконку ошибки загрузки без пояснений.
+   *Решение:* добавить обработчик на img с fallback сообщением или повторной попыткой
+3. Проблемы с a11y
+   В целом-то для реализации вьювера через картинки сильно о доступности говорить не приходится, но есть пара проблем, которые можно решить, если чуть подзаморочиться:
+   - Аннотации недоступны с клавиатуры (нет tab-навигации, нет перемещения стрелками);
+   - Диалог добавления аннотации не перехватывает фокус (спорная практика);
+   - Добавить управление зумом с клавиатуры (Ctrl+Scroll Up/Down, Ctrl и +/-)
+   *Решение:* добавить tabindex, обработку клавиш, focus trap в диалог, повесить обработчики на комбинацию клавиш для управления зумом
+4. Тесты :)
+   *Решение:* потестить
+5. Проблемы на мобилке - малость кривая обработка драг ивентов на мобилке
+   *Решение*: Добавить обработку для pointercancel (срабатывает, когда на экране всплывает какое-то уведомление от системы, и браузер решает, что оно важней происходящего на экране) - сейчас обрабатываем только pointerup, который в таком кейсе может и не сработать вообще
